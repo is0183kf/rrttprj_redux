@@ -1,8 +1,10 @@
-import { Counter } from './features/counter/Counter';
+import { TodoContainer } from './features/todos/components/TodoContainer';
 
 function App() {
   return (
-    <Counter />
+    <>
+      <TodoContainer />
+    </>
   )
 }
 
