@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { TodoInput, Todo, TodoId, TodoUpdatePayload } from './types';
-import { createTodo, removeTodo, updateTodo } from './crud/crudIndex';
+import { createTodo, removeTodo, updateTodo, restoreTodo } from './crud/crudIndex';
 import type { RootState } from '../../app/store';
 
 export type TodoState = {
@@ -43,11 +43,22 @@ export const todoSlice = createSlice({
         ...input,
       });
     },
+    restore: (state, action: PayloadAction<TodoId>) => {
+      const id = action.payload;
+      const index = state.todos.findIndex((todo) => todo.id === id);
+      const todo = state.todos[index];
+      if (!todo) return;
+
+      state.todos[index] = restoreTodo(todo);
+    },
   },
 });
 
-export const { create, remove, update} = todoSlice.actions;
+export const { create, remove, update, restore} = todoSlice.actions;
 export const selectTodos = (state: RootState) => 
 state.todos.todos.filter((todo) => todo.deletedAt === undefined);
+
+export const selectDeletedTodos = (state: RootState) =>
+state.todos.todos.filter((todo) => todo.deletedAt !== undefined);
 
 export default todoSlice.reducer;

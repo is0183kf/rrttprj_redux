@@ -1,9 +1,13 @@
 import type { FC } from 'react';
-import { useAppSelector, useAppDispatch } from '../../../app/hooks';
-import { update, remove, selectTodos } from '../todosSlice';
+import { useAppDispatch } from '../../../app/hooks';
+import { update, remove, restore } from '../todosSlice';
+import type { Todo } from '../types'
 
-export const TodoList: FC = () => {
-  const todos = useAppSelector(selectTodos);
+type Props = {
+  todos: Todo[];
+};
+
+export const TodoList: FC<Props> = ({ todos }) => {
   const dispatch = useAppDispatch();
 
   return (
@@ -42,6 +46,7 @@ export const TodoList: FC = () => {
                   <td>{todo.deletedAt ?? '無し'}</td>
                   <td>
                     <button
+                      disabled={isDeletedTodo(todo)}
                       onClick={() => {
                         //doza 2022/08/20 暫定箇所
                         dispatch(update({
@@ -58,13 +63,23 @@ export const TodoList: FC = () => {
                     </button>
                   </td>
                   <td>
-                    <button
-                      onClick={() => {
-                        dispatch(remove(todo.id));
-                      }}
-                    >
-                      削除
-                    </button>
+                    {isDeletedTodo(todo) ? (
+                      <button
+                        onClick={() => {
+                          dispatch(restore(todo.id));
+                        }}
+                      >
+                        復元
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          dispatch(remove(todo.id));
+                        }}
+                      >
+                        削除
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
@@ -74,6 +89,10 @@ export const TodoList: FC = () => {
       </table>
     </>
   );
+};
+
+const isDeletedTodo = (todo: Todo) => {
+  return todo.deletedAt !== undefined;
 };
 
 export default TodoList;
