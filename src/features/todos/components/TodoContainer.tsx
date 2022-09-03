@@ -2,11 +2,11 @@ import { useEffect, type FC } from 'react';
 import { TodoForm } from './TodoForm';
 import { TodoList } from './TodoList';
 import { useAppSelector, useAppDispatch } from '../../../app/hooks';
-import { selectTodos, selectDeletedTodos, fetchTodosAsync, selectIsFetching } from '../todosSlice';
+import { fetchTodosAsync, selectIsFetching, selectTodosByDisplayStatus } from '../todosSlice';
+import { DisplayStatusSelector } from './DisplayStatusSelector'
 
 export const TodoContainer: FC = () => {
-    const todos = useAppSelector(selectTodos);
-    const deletedTodos = useAppSelector(selectDeletedTodos);
+    const todos = useAppSelector(selectTodosByDisplayStatus);
 
     const isFetching = useAppSelector(selectIsFetching);
     const dispatch = useAppDispatch();
@@ -20,11 +20,9 @@ export const TodoContainer: FC = () => {
         <div>
             <TodoForm />
             <hr />
+            <DisplayStatusSelector />
             <h2>Todo一覧</h2>
             <TodoList todos={todos} />
-            <hr />
-            <h2>削除されたTodo一覧</h2>
-            <TodoList todos={deletedTodos} />
         </div>
     );
 };

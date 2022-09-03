@@ -6,13 +6,22 @@ import type { RootState } from '../../app/store';
 import { setTodos } from './localStorage/todosLocalStorage';
 import { fetchTodos } from './api/fetch'
 
+export const DISPLAY_STATUS_MAP = {
+  all: '全て（削除済みは除く）',
+  updated: '更新済み（削除済みは除く）',
+  deleted: '削除済み',
+};
+export type DisplayStatusType = keyof typeof DISPLAY_STATUS_MAP;
+
 export type TodoState = {
+  displayStatus: DisplayStatusType;
   isFetching: boolean;
   error:null | SerializedError;
   todos: Todo[];
 };
 
 const initialState: TodoState = {
+  displayStatus: 'all',
   isFetching: false,
   error:null,
   todos: [],
@@ -61,6 +70,9 @@ export const todoSlice = createSlice({
       state.todos[index] = restoreTodo(todo);
       setTodos(state.todos);
     }, 
+    changeDisplayStatus: (state, action: PayloadAction<DisplayStatusType>) => {
+      state.displayStatus = action.payload;
+    },
    },
     extraReducers: (builder) => {
       builder
@@ -87,7 +99,7 @@ export const fetchTodosAsync = createAsyncThunk<Todo[]>(
     return response.data;
   }
 );
-export const { create, remove, update, restore} = todoSlice.actions;
+export const { create, remove, update, restore,changeDisplayStatus} = todoSlice.actions;
 export const selectTodos = (state: RootState) => 
 state.todos.todos.filter((todo) => todo.deletedAt === undefined);
 
@@ -95,4 +107,18 @@ export const selectDeletedTodos = (state: RootState) =>
 state.todos.todos.filter((todo) => todo.deletedAt !== undefined);
 export const selectIsFetching = (state: RootState) => 
 state.todos.isFetching;
+
+export const selectTodosByDisplayStatus = (state: RootState) => {
+  if (state.todos.displayStatus === 'updated') {
+    return state.todos.todos.filter(
+      (todo) => todo.updatedAt !== undefined && todo.deletedAt === undefined
+    );
+  }
+  if (state.todos.displayStatus === 'deleted') {
+    return selectDeletedTodos(state);
+  }
+
+  return selectTodos(state);
+};
+
 export default todoSlice.reducer;
