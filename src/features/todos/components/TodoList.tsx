@@ -3,6 +3,8 @@ import { useAppDispatch } from '../../../app/hooks';
 import { update, remove, restore } from '../todosSlice';
 import type { Todo } from '../types'
 import { useConfirmModal } from './modals/ConfirmModal/useConfirmModal'
+import { useUpdateTodoModal } from './modals/UpdateTodoModal/useUpdateTodoModal';
+import { translateStatus } from '../utils/todoConverter';
 
 type Props = {
   todos: Todo[];
@@ -10,15 +12,23 @@ type Props = {
 
 export const TodoList: FC<Props> = ({ todos }) => {
   const dispatch = useAppDispatch();
+
   const {
     open: openConfirmModal,
     setMessage,
     ConfirmModalWrapper,
   } = useConfirmModal();
 
+  const {
+    open: openUpdateTodoModal,
+    setTodoInput: setTodoInputForUpdateTodoModal,
+    UpdateTodoModalWrapper,
+  } = useUpdateTodoModal();
+
   return (
     <>
       <ConfirmModalWrapper />
+      <UpdateTodoModalWrapper />
       <table border={1}>
         <thead>
           <tr>
@@ -47,7 +57,7 @@ export const TodoList: FC<Props> = ({ todos }) => {
                   <td>{todo.id}</td>
                   <td>{todo.title}</td>
                   <td>{todo.body}</td>
-                  <td>{todo.status}</td>
+                  <td>{translateStatus(todo.status)}</td>
                   <td>{todo.createdAt}</td>
                   <td>{todo.updatedAt ?? '無し'}</td>
                   <td>{todo.deletedAt ?? '無し'}</td>
@@ -55,15 +65,16 @@ export const TodoList: FC<Props> = ({ todos }) => {
                     <button
                       disabled={isDeletedTodo(todo)}
                       onClick={() => {
-                        //doza 2022/08/20 暫定箇所
-                        dispatch(update({
-                          id: todo.id,
-                          input: {
-                            title: '更新したタイトル' + Date.now(),
-                            body: '更新した本文' + Date.now(),
-                            status: 'completed'
-                          }
-                        }));
+                        setTodoInputForUpdateTodoModal(todo);
+                        openUpdateTodoModal((newTodoInput) => {
+                          const updateAction = update({
+                            id: todo.id,
+                            input: {
+                              ...newTodoInput,
+                            },
+                          });
+                          dispatch(updateAction);
+                        });
                       }}
                     >
                       更新
