@@ -4,6 +4,7 @@ import { TodoList } from './TodoList';
 import { useAppSelector, useAppDispatch } from '../../../app/hooks';
 import { fetchTodosAsync, selectIsFetching, selectTodosByDisplayStatus } from '../todosSlice';
 import { DisplayStatusSelector } from './DisplayStatusSelector'
+import { BaseModal } from './modals/BaseModal'
 
 export const TodoContainer: FC = () => {
     const todos = useAppSelector(selectTodosByDisplayStatus);
@@ -18,6 +19,7 @@ export const TodoContainer: FC = () => {
     if (isFetching) return <div>読み込み中</div>;
     return (
         <div>
+            <BaseModal />
             <TodoForm />
             <hr />
             <DisplayStatusSelector />
